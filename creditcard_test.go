@@ -1,7 +1,6 @@
 package creditcard
 
 import (
-	"strconv"
 	"testing"
 	"time"
 
@@ -40,7 +39,7 @@ func TestFourDigits(t *testing.T) {
 
 func TestWipe(t *testing.T) {
 	Convey("Should be able to wipe our credit card", t, func() {
-		card := Card{Number: "4012888888881881", Cvv: "111", Month: "02", Year: "2015"}
+		card := Card{Number: "4012888888881881", Cvv: "111", Month: 02, Year: 2015}
 		card.Wipe()
 
 		So(card.Number, ShouldEqual, "0000000000000000")
@@ -51,12 +50,12 @@ func TestWipe(t *testing.T) {
 }
 
 func TestValidation(t *testing.T) {
-	month := strconv.Itoa(int(time.Now().UTC().Month()))
-	year := strconv.Itoa(time.Now().UTC().Year())
+	month := time.Now().UTC().Month()
+	year := time.Now().UTC().Year()
 
 	Convey("Expiration should matter", t, func() {
 		Convey("When the expiration year is less than the current year", func() {
-			card := Card{Number: "4012888888881881", Cvv: "111", Month: "02", Year: "2001"}
+			card := Card{Number: "4012888888881881", Cvv: "111", Month: 02, Year: 2001}
 			err := card.Validate(true)
 
 			So(err, ShouldNotBeNil)
@@ -67,7 +66,7 @@ func TestValidation(t *testing.T) {
 
 			examples := []int{0, 13}
 			for _, month := range examples {
-				card := Card{Number: "4012888888881881", Cvv: "111", Month: strconv.Itoa(int(month)), Year: strconv.Itoa(nextYear)}
+				card := Card{Number: "4012888888881881", Cvv: "111", Month: time.Month(month), Year: nextYear}
 				err := card.Validate(true)
 
 				So(err, ShouldNotBeNil)
@@ -77,41 +76,41 @@ func TestValidation(t *testing.T) {
 		Convey("When the expiration month and year is less than the current date", func() {
 			year1, month1, _ := (time.Now().UTC()).AddDate(0, -1, 0).Date()
 
-			card := Card{Number: "4012888888881881", Cvv: "111", Month: strconv.Itoa(int(month1)), Year: strconv.Itoa(year1)}
+			card := Card{Number: "4012888888881881", Cvv: "111", Month: time.Month(month1), Year: year1}
 			err := card.Validate(true)
 
 			So(err, ShouldNotBeNil)
 		})
 
-		Convey("When the expiration year is invalid", func() {
-			Convey("with two letters", func() {
-				card := Card{Number: "4012888888881881", Cvv: "111", Month: "1", Year: "ab"}
-				err := card.Validate(true)
+		// Convey("When the expiration year is invalid", func() {
+		// 	Convey("with two letters", func() {
+		// 		card := Card{Number: "4012888888881881", Cvv: "111", Month: 1, Year: ab}
+		// 		err := card.Validate(true)
 
-				So(err, ShouldNotBeNil)
-			})
+		// 		So(err, ShouldNotBeNil)
+		// 	})
 
-			Convey("with more than two letters", func() {
-				card := Card{Number: "4012888888881881", Cvv: "111", Month: "1", Year: "abc"}
-				err := card.Validate(true)
+		// 	Convey("with more than two letters", func() {
+		// 		card := Card{Number: "4012888888881881", Cvv: "111", Month: 1, Year: abc}
+		// 		err := card.Validate(true)
 
-				So(err, ShouldNotBeNil)
-			})
-		})
+		// 		So(err, ShouldNotBeNil)
+		// 	})
+		// })
 
-		Convey("When the expiration month is invalid", func() {
-			card := Card{Number: "4012888888881881", Cvv: "111", Month: "abc", Year: year}
-			err := card.Validate(true)
+		// Convey("When the expiration month is invalid", func() {
+		// 	card := Card{Number: "4012888888881881", Cvv: "111", Month: abc, Year: year}
+		// 	err := card.Validate(true)
 
-			So(err, ShouldNotBeNil)
-		})
+		// 	So(err, ShouldNotBeNil)
+		// })
 
-		Convey("and should work when we use only two numbers", func() {
-			card := Card{Number: "4012888888881881", Cvv: "111", Month: month, Year: year[2:]}
-			err := card.Validate(true)
+		// Convey("and should work when we use only two numbers", func() {
+		// 	card := Card{Number: "4012888888881881", Cvv: "111", Month: month, Year: year[2:]}
+		// 	err := card.Validate(true)
 
-			So(err, ShouldBeNil)
-		})
+		// 	So(err, ShouldBeNil)
+		// })
 	})
 
 	Convey("CVV validation", t, func() {
@@ -229,8 +228,8 @@ func TestValidation(t *testing.T) {
 }
 
 func TestMethod(t *testing.T) {
-	month := strconv.Itoa(int(time.Now().UTC().Month()))
-	year := strconv.Itoa(time.Now().UTC().Year())
+	month := time.Now().UTC().Month()
+	year := time.Now().UTC().Year()
 
 	Convey("Card method should validate even when there's less than 13 characters", t, func() {
 		Convey("Should work for American Express", func() {
@@ -474,7 +473,7 @@ func TestCard_ValidateExpiration(t *testing.T) {
 		timeNowCaller = func() time.Time {
 			return time.Date(2001, 3, 1, 1, 1, 1, 1, time.UTC)
 		}
-		card := Card{Number: "4012888888881881", Cvv: "111", Month: "02", Year: "2001"}
+		card := Card{Number: "4012888888881881", Cvv: "111", Month: 02, Year: 2001}
 
 		err := card.ValidateExpiration()
 		So(err, ShouldNotBeNil)

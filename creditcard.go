@@ -3,12 +3,15 @@ package creditcard
 import (
 	"errors"
 	"strconv"
+	"time"
 )
 
 // Card holds generic information about the credit card
 type Card struct {
-	Number, Cvv, Month, Year string
-	Company                  Company
+	Number, Cvv string
+	Month       time.Month
+	Year        int
+	Company     Company
 }
 
 // Company holds a short and long names of who has issued the credit card
@@ -39,7 +42,7 @@ func (c *Card) LastFourDigits() (string, error) {
 
 // Wipe returns the credit card with false/nullified/generic information
 func (c *Card) Wipe() {
-	c.Cvv, c.Number, c.Month, c.Year = "0000", "0000000000000000", "01", "1970"
+	c.Cvv, c.Number, c.Month, c.Year = "0000", "0000000000000000", 1, 1970
 }
 
 // Validate returns nil or an error describing why the credit card didn't validate
@@ -95,36 +98,16 @@ func (c *Card) Validate(allowTestNumbers ...bool) error {
 
 // validates the credit card's expiration date
 func (c *Card) ValidateExpiration() error {
-	var year, month int
-	var err error
-	timeNow := timeNowCaller()
 
-	if len(c.Year) < 3 {
-		year, err = strconv.Atoi(strconv.Itoa(timeNow.UTC().Year())[:2] + c.Year)
-		if err != nil {
-			return errors.New("Invalid year")
-		}
-	} else {
-		year, err = strconv.Atoi(c.Year)
-		if err != nil {
-			return errors.New("Invalid year")
-		}
-	}
-
-	month, err = strconv.Atoi(c.Month)
-	if err != nil {
+	if c.Month < 1 || 12 < c.Month {
 		return errors.New("Invalid month")
 	}
 
-	if month < 1 || 12 < month {
-		return errors.New("Invalid month")
-	}
-
-	if year < timeNowCaller().UTC().Year() {
+	if c.Year < timeNowCaller().UTC().Year() {
 		return errors.New("Credit card has expired")
 	}
 
-	if year == timeNowCaller().UTC().Year() && month < int(timeNowCaller().UTC().Month()) {
+	if c.Year == timeNowCaller().UTC().Year() && c.Month < timeNowCaller().UTC().Month() {
 		return errors.New("Credit card has expired")
 	}
 
